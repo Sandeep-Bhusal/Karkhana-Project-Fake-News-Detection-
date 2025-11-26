@@ -1,75 +1,10 @@
 """
-Search for fact-check articles using Bing Search API
+Search for fact-check articles from trusted sources
 """
-import requests
-import os
 
-def search_fact_check(query, api_key=None, num_results=5):
+def search_fact_check(query, num_results=5):
     """
-    Search for fact-checking articles related to the news topic
-    
-    Args:
-        query (str): Search query (news headline or main topic)
-        api_key (str): Bing Search API key (optional, can use env variable)
-        num_results (int): Number of results to return
-        
-    Returns:
-        list: List of dictionaries containing fact-check articles
-    """
-    # Use provided API key or get from environment
-    if not api_key:
-        api_key = os.environ.get('BING_API_KEY', '')
-    
-    # If no API key available, return mock results
-    if not api_key:
-        return get_mock_fact_check_results(query)
-    
-    try:
-        # Bing Search API endpoint
-        endpoint = "https://api.bing.microsoft.com/v7.0/search"
-        
-        # Add fact-check specific terms to query
-        search_query = f"{query} fact check snopes politifact"
-        
-        # Set up headers
-        headers = {
-            'Ocp-Apim-Subscription-Key': api_key
-        }
-        
-        # Set up parameters
-        params = {
-            'q': search_query,
-            'count': num_results,
-            'mkt': 'en-US',
-            'safeSearch': 'Moderate'
-        }
-        
-        # Make request
-        response = requests.get(endpoint, headers=headers, params=params)
-        response.raise_for_status()
-        
-        # Parse results
-        data = response.json()
-        results = []
-        
-        if 'webPages' in data and 'value' in data['webPages']:
-            for item in data['webPages']['value']:
-                results.append({
-                    'title': item.get('name', ''),
-                    'url': item.get('url', ''),
-                    'snippet': item.get('snippet', ''),
-                    'source': 'Bing Search'
-                })
-        
-        return results
-        
-    except Exception as e:
-        print(f"Error in fact-check search: {str(e)}")
-        return get_mock_fact_check_results(query)
-
-def get_mock_fact_check_results(query):
-    """
-    Return mock fact-check results when API is not available
+    Return fact-check resources from trusted sources
     
     Args:
         query (str): Search query

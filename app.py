@@ -7,7 +7,7 @@ from src.extractor import extract_article_text
 from src.predictor import FakeNewsPredictor
 from src.fact_check import search_fact_check
 from src.related_news import search_related_news
-from src.utils import validate_url, extract_keywords
+from src.utils import validate_url
 
 # Page configuration
 st.set_page_config(
@@ -228,39 +228,38 @@ def main():
         
         # Validate URL
         if not validate_url(url_input):
-            st.error("❌ Please enter a valid URL (must start with http:// or https://)")
+            st.error(" Please enter a valid URL (must start with http:// or https://)")
             return
         
         # Show loading spinner
         with st.spinner("🔄 Analyzing article... Please wait..."):
             
             # Step 1: Extract article text
-            st.info("📰 Extracting article content...")
+            st.info("Extracting article content...")
             article_data = extract_article_text(url_input)
             
             if not article_data['success'] or not article_data['full_text']:
-                st.error(f"❌ Failed to extract article: {article_data.get('error', 'Unknown error')}")
+                st.error(f" Failed to extract article: {article_data.get('error', 'Unknown error')}")
                 return
             
             article_title = article_data['title'] or "Untitled Article"
             article_text = article_data['full_text']
             
             # Step 2: Load model and predict
-            st.info("🤖 Running AI prediction...")
+            st.info("Running AI prediction...")
             predictor = FakeNewsPredictor()
             prediction_result = predictor.predict(article_text)
             
             if prediction_result.get('error'):
-                st.error(f"❌ Prediction error: {prediction_result['error']}")
+                st.error(f" Prediction error: {prediction_result['error']}")
                 return
             
             # Display prediction result
             st.markdown("---")
             display_prediction_result(prediction_result, article_title)
             
-            # Step 3: Get related information using keywords
-            # Extract keywords from title for better search results
-            search_query = extract_keywords(article_title, max_keywords=5)
+            # Step 3: Get related information using article title
+            search_query = article_title
             
             # If fake news, show fact-check links
             if prediction_result['label'] == 'Fake':
@@ -314,18 +313,14 @@ def main():
         
         - **Model**: TF-IDF + Logistic Regression
         - **Text Extraction**: Newspaper3k library
-        - **Search**: Bing Search API (with fallback)
+        - **News Sources**: Online Khabar, BBC News
+        - **Fact-Check**: Snopes, FactCheck.org, PolitiFact, Reuters, AP
         
         ### Disclaimer
         
         This tool uses AI to assist in identifying potentially fake news. Always verify 
         important information through multiple trusted sources. No automated system is 
         100% accurate.
-        
-        ### API Configuration (Optional)
-        
-        To enable live news search, set the `BING_API_KEY` environment variable with 
-        your Bing Search API key. The app will work without it using fallback sources.
         """)
     
     # Display footer
