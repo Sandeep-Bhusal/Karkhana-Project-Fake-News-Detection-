@@ -22,7 +22,7 @@ st.markdown(
     """
     <style>
     .stApp {
-        background: radial-gradient(circle at top left, #e0e7ff 0, #f5f5f7 45%, #fef3c7 100%);
+        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
@@ -40,24 +40,25 @@ st.markdown(
     .hero-title {
         font-size: 2.4rem;
         font-weight: 700;
-        color: #111827;
+        color: #ffffff;
         margin-bottom: 0.4rem;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
 
     .hero-subtitle {
         font-size: 1rem;
-        color: #4b5563;
+        color: #e5e7eb;
         max-width: 540px;
         margin: 0 auto;
     }
 
     .hero-pill {
-        background: rgba(99, 102, 241, 0.12);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 0.3rem 0.75rem;
         border-radius: 999px;
         font-weight: 600;
         font-size: 0.8rem;
-        color: #4338ca;
+        color: #ffffff;
         display: inline-block;
         margin-bottom: 0.7rem;
     }
@@ -71,8 +72,27 @@ st.markdown(
     .url-label {
         font-size: 1rem;
         font-weight: 600;
-        color: #1f2937;
+        color: #ffffff;
         margin-bottom: 0.55rem;
+    }
+
+    .stTextInput input {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 2px solid transparent !important;
+        border-image: linear-gradient(135deg, #667eea, #764ba2) 1 !important;
+        border-radius: 999px !important;
+        color: #ffffff !important;
+        padding: 0.75rem 1.5rem !important;
+        font-size: 1rem !important;
+    }
+
+    .stTextInput input::placeholder {
+        color: #9ca3af !important;
+    }
+
+    .stTextInput input:focus {
+        border-image: linear-gradient(135deg, #764ba2, #667eea) 1 !important;
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.3) !important;
     }
 
     .stTextInput {
@@ -81,7 +101,7 @@ st.markdown(
 
     .url-help {
         font-size: 0.85rem;
-        color: #6b7280;
+        color: #9ca3af;
         margin-bottom: 1.4rem;
     }
 
@@ -95,14 +115,17 @@ st.markdown(
         padding: 0.65rem 2rem;
         font-size: 1rem;
         font-weight: 600;
-        border: none;
-        background: linear-gradient(135deg, #4f46e5, #3b82f6);
+        border: 2px solid transparent;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: #ffffff;
-        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.4);
+        box-shadow: 0 10px 24px rgba(102, 126, 234, 0.4);
+        transition: all 0.3s ease;
     }
 
     .stButton > button:hover {
-        background: linear-gradient(135deg, #4338ca, #2563eb);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        box-shadow: 0 15px 30px rgba(118, 75, 162, 0.5);
+        transform: translateY(-2px);
     }
 
     .badge-fake, .badge-real {
@@ -117,50 +140,52 @@ st.markdown(
     }
 
     .badge-fake {
-        background-color: #fef2f2;
-        color: #b91c1c;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: #ffffff;
     }
 
     .badge-real {
-        background-color: #ecfdf3;
-        color: #15803d;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
     }
 
     .result-title {
         font-size: 1.2rem;
         font-weight: 600;
         margin: 0.6rem 0 0.2rem 0;
-        color: #111827;
+        color: #ffffff;
     }
 
     .result-conf {
         font-size: 0.84rem;
-        color: #6b7280;
+        color: #9ca3af;
         margin-bottom: 0.4rem;
     }
 
     .link-card {
         padding: 0.8rem 0.9rem;
         border-radius: 0.7rem;
-        border: 1px solid #e5e7eb;
-        background: #f9fafb;
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        background: rgba(255, 255, 255, 0.05);
         margin-bottom: 0.5rem;
+        backdrop-filter: blur(10px);
     }
 
     .link-title {
         font-size: 0.94rem;
         font-weight: 600;
-        color: #1d4ed8;
+        color: #818cf8;
         text-decoration: none;
     }
 
     .link-title:hover {
+        color: #a5b4fc;
         text-decoration: underline;
     }
 
     .link-snippet {
         font-size: 0.8rem;
-        color: #4b5563;
+        color: #d1d5db;
         margin-top: 0.25rem;
     }
 
@@ -170,11 +195,61 @@ st.markdown(
         margin-top: 0.15rem;
     }
 
+    .about-section {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        border-radius: 0.7rem;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        backdrop-filter: blur(10px);
+    }
+
+    .about-section h3 {
+        color: #ffffff;
+        margin-bottom: 1rem;
+    }
+
+    .about-section p, .about-section li {
+        color: #e5e7eb;
+        line-height: 1.6;
+    }
+
     .footer {
         text-align: center;
         font-size: 0.8rem;
-        color: #a1a1aa;
+        color: #9ca3af;
         margin-top: 2rem;
+    }
+
+    /* Streamlit specific overrides for dark theme */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 0.5rem;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        color: #9ca3af;
+    }
+
+    .stTabs [aria-selected="true"] {
+        color: #ffffff;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .stTextArea textarea {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(102, 126, 234, 0.3) !important;
+        color: #ffffff !important;
+    }
+
+    .stMarkdown {
+        color: #e5e7eb;
+    }
+
+    .stAlert {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(102, 126, 234, 0.3) !important;
+        color: #ffffff !important;
     }
 
     #MainMenu {visibility: hidden;}
@@ -243,9 +318,6 @@ def main():
                 Paste a news article URL and let the model estimate whether the content is more
                 likely to be <strong>real</strong> or <strong>fake</strong>. You also get links
                 to help you cross-check the story.
-            </p>
-            <p class="meta">
-                Model: TF–IDF + Logistic Regression · Interface: Streamlit Web App
             </p>
         </div>
         """,
@@ -365,24 +437,25 @@ def main():
                         related_links = search_related_news(query)
                     show_links(related_links, "Similar news from other sources", "📰")
 
-    # About + footer
-    with st.expander("About this tool"):
-        st.markdown(
-            """
-            **How it works**
-
-            1. You paste a news article URL.  
-            2. The app extracts the main article text.  
-            3. The text is converted into TF–IDF features and passed to a Logistic Regression model.  
-            4. The model outputs a label (Real/Fake) and a confidence score.  
-            5. The app suggests fact-check pages or similar news so you can cross-check.
-
-            **Important**
-
-            This tool is an aid to critical thinking, not a replacement.  
-            Always rely on multiple trusted sources for important information.
-            """
-        )
+    # About section - always visible
+    st.markdown(
+        """
+        <div class="about-section">
+            <h3>ℹ️ About This Tool</h3>
+            <p><strong>How it works</strong></p>
+            <ol>
+                <li>You paste a news article URL.</li>
+                <li>The app extracts the main article text.</li>
+                <li>The text is converted into TF–IDF features and passed to a Logistic Regression model.</li>
+                <li>The model outputs a label (Real/Fake) and a confidence score.</li>
+                <li>The app suggests fact-check pages or similar news so you can cross-check.</li>
+            </ol>
+            <p><strong>Important</strong></p>
+            <p>This tool is an aid to critical thinking, not a replacement. Always rely on multiple trusted sources for important information.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.markdown('</div>', unsafe_allow_html=True)  # close content-card
 

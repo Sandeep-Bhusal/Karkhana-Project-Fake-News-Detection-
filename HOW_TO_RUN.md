@@ -213,29 +213,6 @@ This will train with 40,000+ articles and achieve 95-98% accuracy!
 
 ---
 
-## Optional: Bing Search API
-
-To enable live fact-checking and news search:
-
-1. **Get API key:**
-   - Go to: https://azure.microsoft.com/services/cognitive-services/bing-web-search-api/
-   - Sign up for free tier
-
-2. **Set environment variable:**
-   ```bash
-   # Windows PowerShell
-   $env:BING_API_KEY="your_api_key_here"
-   
-   # Windows CMD
-   set BING_API_KEY=your_api_key_here
-   ```
-
-3. **Restart the app**
-
-Without the API, the app uses fallback links to popular fact-checking and news websites.
-
----
-
 ## Common Commands Summary
 
 ```bash
