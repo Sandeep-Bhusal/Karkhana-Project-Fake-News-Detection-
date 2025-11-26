@@ -1,12 +1,12 @@
-# 🔍 Fake News Detection System
+# Fake News Detection System
 
 A machine learning-powered web application that analyzes news articles to detect fake news and provides fact-checking resources.
 
-## 📋 Overview
+## Overview
 
 This project uses Natural Language Processing (NLP) and Machine Learning to classify news articles as real or fake. The application extracts content from URLs, analyzes it using a trained model, and provides users with fact-checking resources and related news from trusted sources.
 
-## ✨ Features
+## Features
 
 - **URL-based Analysis**: Simply paste a news article URL to analyze
 - **AI-Powered Detection**: Uses TF-IDF vectorization and Logistic Regression
@@ -15,7 +15,7 @@ This project uses Natural Language Processing (NLP) and Machine Learning to clas
 - **Clean UI**: Google-inspired interface with intuitive design
 - **Confidence Scores**: Shows prediction confidence for transparency
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 Fake News/
@@ -146,10 +146,6 @@ Without the API key, the app uses fallback links to popular fact-checking websit
    - Select your repository
    - Set main file path: `app.py`
    - Click "Deploy"
-
-3. **Optional: Add API Key**
-   - In Streamlit Cloud dashboard, go to app settings
-   - Add secret: `BING_API_KEY = your_key`
 
 ## 🧪 How It Works
 
