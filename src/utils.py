@@ -31,6 +31,51 @@ def clean_text(text):
     
     return text
 
+def extract_keywords(text, max_keywords=5):
+    """
+    Extract important keywords from text for search queries
+    
+    Args:
+        text (str): Text to extract keywords from
+        max_keywords (int): Maximum number of keywords to return
+        
+    Returns:
+        str: Space-separated keywords
+    """
+    if not text:
+        return ""
+    
+    # Common stop words to remove
+    stop_words = {
+        'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+        'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been',
+        'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would',
+        'could', 'should', 'may', 'might', 'must', 'can', 'this', 'that',
+        'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they',
+        'what', 'which', 'who', 'when', 'where', 'why', 'how'
+    }
+    
+    # Convert to lowercase and split into words
+    words = text.lower().split()
+    
+    # Filter out stop words, short words, and non-alphabetic words
+    keywords = [
+        word.strip(string.punctuation) 
+        for word in words 
+        if len(word) > 3 and word.lower() not in stop_words and word.isalpha()
+    ]
+    
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_keywords = []
+    for word in keywords:
+        if word not in seen:
+            seen.add(word)
+            unique_keywords.append(word)
+    
+    # Return top keywords
+    return ' '.join(unique_keywords[:max_keywords])
+
 def validate_url(url):
     """
     Validate if a string is a proper URL

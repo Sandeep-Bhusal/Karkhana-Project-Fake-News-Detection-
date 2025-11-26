@@ -7,7 +7,7 @@ from src.extractor import extract_article_text
 from src.predictor import FakeNewsPredictor
 from src.fact_check import search_fact_check
 from src.related_news import search_related_news
-from src.utils import validate_url
+from src.utils import validate_url, extract_keywords
 
 # Page configuration
 st.set_page_config(
@@ -258,8 +258,9 @@ def main():
             st.markdown("---")
             display_prediction_result(prediction_result, article_title)
             
-            # Step 3: Get related information
-            search_query = article_title
+            # Step 3: Get related information using keywords
+            # Extract keywords from title for better search results
+            search_query = extract_keywords(article_title, max_keywords=5)
             
             # If fake news, show fact-check links
             if prediction_result['label'] == 'Fake':
