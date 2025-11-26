@@ -177,6 +177,51 @@ st.markdown(
         margin-top: 2rem;
     }
 
+    /* Remove the ugly box around radio labels */
+    .stRadio [data-baseweb="radio"] {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Remove the white square container */
+    .stRadio [data-baseweb="radio"] > div {
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Style the radio circles */
+    .stRadio [role="radio"] {
+        width: 18px !important;
+        height: 18px !important;
+        border: 2px solid #ffffff !important;
+        background: transparent !important;
+        border-radius: 50% !important;
+        margin-right: 6px !important;
+    }
+
+    /* Selected radio circle */
+    .stRadio [aria-checked="true"] {
+        background: #ffffff !important;
+        border-color: #ffffff !important;
+    }
+
+    /* Text label styling */
+    .stRadio label p {
+        color: #ffffff !important;
+        font-size: 0.92rem !important;
+        font-weight: 500 !important;
+        margin-left: 4px !important;
+    }
+
+    /* Row alignment */
+    .stRadio > div {
+        display: flex !important;
+        gap: 1.4rem !important;
+        align-items: center !important;
+    }
+
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     </style>
