@@ -315,7 +315,7 @@ def main():
             </div>
             <h1 class="hero-title">Fake News Detector</h1>
             <p class="hero-subtitle">
-                Paste a news article URL and let the model estimate whether the content is more
+                Paste a news article URL or text and let the model estimate whether the content is more
                 likely to be <strong>real</strong> or <strong>fake</strong>. You also get links
                 to help you cross-check the story.
             </p>
@@ -327,29 +327,41 @@ def main():
     # Main white card
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
 
-    # URL Input
-    st.markdown('<div class="url-label">News article URL</div>', unsafe_allow_html=True)
-    url = st.text_input(
-        label="",
-        placeholder="https://example.com/news-article",
-        label_visibility="collapsed",
-        key="news_url",
+    # Input options
+    input_mode = st.radio(
+        "Choose input method:",
+        ["URL", "Text"],
+        horizontal=True,
+        label_visibility="visible"
     )
 
-    # NEW — TEXT INPUT
-    st.markdown('<div class="url-label">Or paste news text</div>', unsafe_allow_html=True)
-    text_input = st.text_area(
-        label="",
-        placeholder="Paste the news article content here...",
-        height=180,
-        label_visibility="collapsed",
-        key="news_text",
-    )
-
-    st.markdown(
-        '<div class="url-help">You can enter a URL or paste raw text. The model will analyze whichever you provide.</div>',
-        unsafe_allow_html=True,
-    )
+    if input_mode == "URL":
+        st.markdown('<div class="url-label">News article URL</div>', unsafe_allow_html=True)
+        url = st.text_input(
+            label="",
+            placeholder="https://example.com/news-article",
+            label_visibility="collapsed",
+            key="news_url",
+        )
+        text_input = ""
+        st.markdown(
+            '<div class="url-help">Paste the full URL of an online news article you want to check.</div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown('<div class="url-label">News text or headline</div>', unsafe_allow_html=True)
+        text_input = st.text_area(
+            label="",
+            placeholder="Enter news headline or paste article content here...",
+            height=150,
+            label_visibility="collapsed",
+            key="news_text",
+        )
+        url = ""
+        st.markdown(
+            '<div class="url-help">⚠️ Note: The model analyzes text patterns, it cannot verify if events actually happened. Cross-check with reliable sources.</div>',
+            unsafe_allow_html=True,
+        )
 
     # Button row
     st.markdown('<div class="action-row">', unsafe_allow_html=True)
@@ -365,29 +377,71 @@ def main():
     # ---- CASE 1: TEXT PASTED ----
     elif analyze and text_input.strip():
 
-        article_title = "User provided text"
+        article_title = text_input.strip()[:100] if len(text_input.strip()) < 200 else "User provided text"
         article_text = text_input.strip()
 
-        predictor = FakeNewsPredictor()
-        result = predictor.predict(article_text)
+        with st.spinner("Analyzing text..."):
+            predictor = FakeNewsPredictor()
+            result = predictor.predict(article_text)
 
-        if result.get("error"):
-            st.error(f"Prediction error: {result['error']}")
-            return
+            if result.get("error"):
+                st.error(f"Prediction error: {result['error']}")
+                return
 
         st.markdown("---")
+        
+        # Warning box for text input
+        st.warning(
+            "⚠️ **Important Limitation**: This model analyzes text patterns and language style, "
+            "NOT factual accuracy. It cannot verify if events actually happened. "
+            "Always cross-check with multiple trusted news sources below."
+        )
+        
         show_prediction(result, article_title)
 
-        tab_overview, tab_article = st.tabs(["Overview", "Full Text"])
+        # Tabs with fact-check links for text input too
+        tab_overview, tab_article, tab_links = st.tabs(
+            ["Overview", "Article text", "Fact-check & similar news"]
+        )
 
         with tab_overview:
             st.write(
-                "The prediction above is based on patterns learned from a labelled "
-                "fake/real news dataset. Treat it as a signal, not a final verdict."
+                "**What the model does:**\n"
+                "- Analyzes word patterns, writing style, and linguistic features\n"
+                "- Compares against patterns learned from fake vs real news datasets\n\n"
+                "**What the model CANNOT do:**\n"
+                "- Verify if events actually occurred\n"
+                "- Check credibility of sources\n"
+                "- Access real-time information or current events\n\n"
+                "**Always verify with the fact-check resources in the next tab!**"
             )
 
         with tab_article:
-            st.text_area("", value=article_text[:6000], height=260)
+            st.write("### Your input text")
+            st.text_area(
+                label="",
+                value=article_text[:6000],
+                height=260,
+                label_visibility="collapsed",
+            )
+
+        with tab_links:
+            query = article_title
+
+            if result["label"] == "Fake":
+                with st.spinner("Searching for fact-check resources..."):
+                    fact_links = search_fact_check(query)
+                show_links(fact_links, "Fact-check resources", "🛡️")
+
+                with st.spinner("Searching for verified coverage..."):
+                    verified_links = search_related_news(query)
+                st.markdown("")
+                show_links(verified_links, "Verified coverage from other sources", "📰")
+
+            else:
+                with st.spinner("Searching for similar coverage from other sources..."):
+                    related_links = search_related_news(query)
+                show_links(related_links, "Similar news from other sources", "📰")
 
     # ---- CASE 2: URL ANALYZED ----
     elif analyze and url.strip():
@@ -429,12 +483,24 @@ def main():
 
             with tab_overview:
                 st.write(
-                    "The prediction above is based on patterns learned from a labelled "
-                    "fake/real news dataset. Treat it as a signal, not a final verdict."
+                    "**What the model does:**\n"
+                    "- Analyzes word patterns, writing style, and linguistic features\n"
+                    "- Compares against patterns learned from fake vs real news datasets\n\n"
+                    "**What the model CANNOT do:**\n"
+                    "- Verify if events actually occurred\n"
+                    "- Check credibility of sources\n"
+                    "- Access real-time information or current events\n\n"
+                    "**Always verify with the fact-check resources in the next tab!**"
                 )
 
             with tab_article:
-                st.text_area("", value=article_text[:6000], height=260)
+                st.write("### Extracted article text (preview)")
+                st.text_area(
+                    label="",
+                    value=article_text[:6000],
+                    height=260,
+                    label_visibility="collapsed",
+                )
 
             with tab_links:
                 query = article_title
@@ -461,14 +527,15 @@ def main():
             <h3>ℹ️ About This Tool</h3>
             <p><strong>How it works</strong></p>
             <ol>
-                <li>You paste a news article URL.</li>
-                <li>The app extracts the main article text.</li>
+                <li>You paste a news article URL or text.</li>
+                <li>The app extracts or uses the provided text.</li>
                 <li>The text is converted into TF–IDF features and passed to a Logistic Regression model.</li>
+                <li>The model analyzes language patterns (NOT factual accuracy).</li>
                 <li>The model outputs a label (Real/Fake) and a confidence score.</li>
                 <li>The app suggests fact-check pages or similar news so you can cross-check.</li>
             </ol>
-            <p><strong>Important</strong></p>
-            <p>This tool is an aid to critical thinking, not a replacement. Always rely on multiple trusted sources for important information.</p>
+            <p><strong>⚠️ Critical Limitations</strong></p>
+            <p><strong>This model CANNOT verify if events actually happened.</strong> It only analyzes writing patterns and style. A well-written fake story may be classified as "real" and vice versa. <strong>Always verify claims with multiple trusted sources.</strong> This tool is an aid to critical thinking, not a replacement for thorough fact-checking.</p>
         </div>
         """,
         unsafe_allow_html=True,
