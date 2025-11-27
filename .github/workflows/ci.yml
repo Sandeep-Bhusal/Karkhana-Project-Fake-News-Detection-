@@ -26,6 +26,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     
-    - name: Train model
+    - name: Verify model files exist
       run: |
-        python model/train_model.py
+        if [ ! -f "model/model.pkl" ] || [ ! -f "model/tfidf.pkl" ]; then
+          echo "Error: Pre-trained model files not found!"
+          echo "Please commit model/model.pkl and model/tfidf.pkl to the repository"
+          exit 1
+        fi
+        echo "✓ Model files found"
