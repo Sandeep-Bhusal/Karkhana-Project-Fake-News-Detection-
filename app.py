@@ -380,23 +380,19 @@ def main():
         article_title = text_input.strip()[:100] if len(text_input.strip()) < 200 else "User provided text"
         article_text = text_input.strip()
 
-        with st.spinner("Analyzing text and searching for related news..."):
-            # Search for related news first
-            query = article_title
-            related_links = search_related_news(query)
-            
-            # Get model prediction
+        with st.spinner("Analyzing text..."):
+            # Get model prediction based on text content
             predictor = FakeNewsPredictor()
             result = predictor.predict(article_text)
 
             if result.get("error"):
                 st.error(f"Prediction error: {result['error']}")
                 return
-            
-            # If related news found, lean towards showing it as real
-            if related_links and len(related_links) > 0:
-                result["label"] = "Real"
-                result["confidence"] = min(result["confidence"], 75.0)  # Cap confidence at 75%
+        
+        # Search for related news for user to verify
+        with st.spinner("Searching for related news..."):
+            query = article_title
+            related_links = search_related_news(query)
 
         st.markdown("---")
         
