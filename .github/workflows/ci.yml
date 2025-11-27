@@ -28,9 +28,9 @@ jobs:
     
     - name: Verify model files exist
       run: |
-        if [ ! -f "model/model.pkl" ] || [ ! -f "model/tfidf.pkl" ]; then
+        if [ ! -f "model/model.pkl" ] || [ ! -f "model/tfidf_vectorizer.pkl" ]; then
           echo "Error: Pre-trained model files not found!"
-          echo "Please commit model/model.pkl and model/tfidf.pkl to the repository"
+          echo "Please commit model/model.pkl and model/tfidf_vectorizer.pkl to the repository"
           exit 1
         fi
         echo "✓ Model files found"
