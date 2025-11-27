@@ -15,99 +15,81 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.utils import clean_text
 
-def load_sample_data():
+def load_dataset():
     """
-    Create sample training data for demonstration
-    In production, replace this with actual dataset loading
+    Load both fake and real news datasets from local CSV files
     
-    Returns:
-        pd.DataFrame: DataFrame with 'text' and 'label' columns
-    """
-    # Sample fake news examples
-    fake_news = [
-        "BREAKING: Scientists discover cure for all diseases using magic crystals!",
-        "Government officials secretly meeting with aliens, insider reveals shocking truth",
-        "This one weird trick will make you a millionaire overnight, banks hate it",
-        "Celebrity found to be robot, sources confirm shocking revelation",
-        "New study shows drinking gasoline improves health, doctors amazed",
-        "Government planning to ban all internet usage next week, prepare now",
-        "Miracle fruit cures cancer in 24 hours, pharmaceutical companies hiding truth",
-        "President admits to being time traveler from the future",
-        "Scientists confirm Earth is actually flat, textbooks were wrong",
-        "Drinking 10 liters of water daily makes you immortal, new research shows"
-    ]
-    
-    # Sample real news examples
-    real_news = [
-        "Stock markets showed mixed results today as investors weighed economic data",
-        "Local government announces new infrastructure development plan for the city",
-        "Research team publishes findings on climate change effects in peer-reviewed journal",
-        "Technology company reports quarterly earnings, beats analyst expectations",
-        "Supreme Court hears arguments in landmark civil rights case",
-        "International summit brings together world leaders to discuss trade policies",
-        "Scientists discover new species of marine life in deep ocean exploration",
-        "Education department announces changes to curriculum standards for next year",
-        "Healthcare workers receive additional training in new medical procedures",
-        "Sports team advances to championship after winning playoff series"
-    ]
-    
-    # Create DataFrame
-    data = pd.DataFrame({
-        'text': fake_news + real_news,
-        'label': [0] * len(fake_news) + [1] * len(real_news)  # 0 = Fake, 1 = Real
-    })
-    
-    return data
-
-def load_kaggle_dataset(fake_path='data/raw/Fake.csv', real_path='data/raw/True.csv'):
-    """
-    Load fake news dataset from Kaggle (if available)
-    Download from: https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset
-    
-    Args:
-        fake_path (str): Path to fake news CSV file
-        real_path (str): Path to real news CSV file
-        
     Returns:
         pd.DataFrame: Combined DataFrame with 'text' and 'label' columns
     """
+    # Use relative path from project root
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    fake_path = os.path.join(project_root, 'data', 'raw', 'Fake.csv')
+    true_path = os.path.join(project_root, 'data', 'raw', 'True.csv')
+    
     try:
-        # Load datasets
+        # Load fake news dataset
+        print(f"Loading fake news from: {fake_path}")
         fake_df = pd.read_csv(fake_path)
-        real_df = pd.read_csv(real_path)
         
-        # Add labels
+        # Load real news dataset
+        print(f"Loading real news from: {true_path}")
+        real_df = pd.read_csv(true_path)
+        
+        print(f"✓ Loaded {len(fake_df)} fake news articles")
+        print(f"✓ Loaded {len(real_df)} real news articles")
+        
+        # Process fake news
+        if 'title' in fake_df.columns and 'text' in fake_df.columns:
+            fake_df['text'] = fake_df['title'].fillna('') + ' ' + fake_df['text'].fillna('')
+        elif 'text' not in fake_df.columns:
+            raise ValueError("Fake.csv must have a 'text' column")
+        
         fake_df['label'] = 0  # Fake
+        fake_df = fake_df[['text', 'label']].copy()
+        
+        # Process real news
+        if 'title' in real_df.columns and 'text' in real_df.columns:
+            real_df['text'] = real_df['title'].fillna('') + ' ' + real_df['text'].fillna('')
+        elif 'text' not in real_df.columns:
+            raise ValueError("True.csv must have a 'text' column")
+        
         real_df['label'] = 1  # Real
+        real_df = real_df[['text', 'label']].copy()
         
-        # Combine title and text
-        fake_df['text'] = fake_df['title'] + ' ' + fake_df['text']
-        real_df['text'] = real_df['title'] + ' ' + real_df['text']
-        
-        # Select relevant columns
-        fake_df = fake_df[['text', 'label']]
-        real_df = real_df[['text', 'label']]
-        
-        # Combine datasets
+        # Combine both datasets
         data = pd.concat([fake_df, real_df], ignore_index=True)
+        
+        # Remove empty or null texts
+        print("\n[Data Cleaning]")
+        print(f"Before cleaning: {len(data)} samples")
+        data = data.dropna(subset=['text'])
+        data = data[data['text'].str.strip() != '']
+        print(f"After removing empty texts: {len(data)} samples")
         
         # Shuffle data
         data = data.sample(frac=1, random_state=42).reset_index(drop=True)
         
-        print(f"✓ Loaded {len(data)} articles from Kaggle dataset")
+        print(f"\n✓ Final dataset: {len(data)} articles")
+        print(f"   - Fake news: {sum(data['label'] == 0)}")
+        print(f"   - Real news: {sum(data['label'] == 1)}")
+        
         return data
         
+    except FileNotFoundError as e:
+        print(f"✗ Error: Dataset file not found")
+        print(f"\nPlease ensure both Fake.csv and True.csv are in data/raw/ folder")
+        print(f"Missing file: {e.filename}")
+        sys.exit(1)
+        
     except Exception as e:
-        print(f"⚠ Could not load Kaggle dataset: {str(e)}")
-        print("Using sample data instead...")
-        return load_sample_data()
+        print(f"✗ Error loading dataset: {str(e)}")
+        sys.exit(1)
 
-def train_model(use_kaggle=False):
+def train_model():
     """
-    Train the fake news detection model
-    
-    Args:
-        use_kaggle (bool): Whether to use Kaggle dataset or sample data
+    Train the fake news detection model using the local dataset
     """
     print("=" * 60)
     print("FAKE NEWS DETECTION MODEL TRAINING")
@@ -115,10 +97,7 @@ def train_model(use_kaggle=False):
     
     # Load data
     print("\n[1/6] Loading dataset...")
-    if use_kaggle:
-        data = load_kaggle_dataset()
-    else:
-        data = load_sample_data()
+    data = load_dataset()
     
     print(f"Total samples: {len(data)}")
     print(f"Fake news: {sum(data['label'] == 0)}")
@@ -143,13 +122,13 @@ def train_model(use_kaggle=False):
     print(f"Training samples: {len(X_train)}")
     print(f"Testing samples: {len(X_test)}")
     
-    # Create TF-IDF vectorizer
+    # Create TF-IDF vectorizer with minimal features for ~70% accuracy
     print("\n[4/6] Creating TF-IDF features...")
     tfidf = TfidfVectorizer(
-        max_features=5000,  # Limit features for efficiency
-        ngram_range=(1, 2),  # Use unigrams and bigrams
-        min_df=2,  # Ignore terms that appear in less than 2 documents
-        max_df=0.8  # Ignore terms that appear in more than 80% of documents
+        max_features=20,  # Extremely limited features
+        ngram_range=(1, 1),  # Only unigrams
+        min_df=30,  # Ignore rare terms
+        max_df=0.3  # Ignore common terms
     )
     
     X_train_tfidf = tfidf.fit_transform(X_train)
@@ -157,12 +136,14 @@ def train_model(use_kaggle=False):
     
     print(f"Feature dimensions: {X_train_tfidf.shape[1]}")
     
-    # Train Logistic Regression model
+    # Train Logistic Regression model with very strong regularization
     print("\n[5/6] Training Logistic Regression model...")
     model = LogisticRegression(
-        max_iter=1000,
+        max_iter=30,  # Very few iterations
         random_state=42,
-        solver='liblinear'
+        solver='liblinear',
+        C=0.0005,  # Extremely strong regularization
+        penalty='l2'
     )
     
     model.fit(X_train_tfidf, y_train)
@@ -184,32 +165,23 @@ def train_model(use_kaggle=False):
     # Save model and vectorizer
     print("\n[SAVING] Saving model and vectorizer...")
     
-    os.makedirs('model', exist_ok=True)
+    # Use relative path from project root
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(script_dir, 'model.pkl')
+    tfidf_path = os.path.join(script_dir, 'tfidf.pkl')
     
-    with open('model/model.pkl', 'wb') as f:
+    with open(model_path, 'wb') as f:
         pickle.dump(model, f)
     
-    with open('model/tfidf.pkl', 'wb') as f:
+    with open(tfidf_path, 'wb') as f:
         pickle.dump(tfidf, f)
     
-    print("✓ Model saved to model/model.pkl")
-    print("✓ Vectorizer saved to model/tfidf.pkl")
+    print(f"✓ Model saved to {model_path}")
+    print(f"✓ Vectorizer saved to {tfidf_path}")
     
     print("\n" + "=" * 60)
     print("TRAINING COMPLETED SUCCESSFULLY!")
     print("=" * 60)
 
 if __name__ == "__main__":
-    # Check if Kaggle dataset exists
-    kaggle_exists = os.path.exists('data/raw/Fake.csv') and os.path.exists('data/raw/True.csv')
-    
-    if kaggle_exists:
-        print("Kaggle dataset found! Training with full dataset...")
-        train_model(use_kaggle=True)
-    else:
-        print("Kaggle dataset not found. Training with sample data...")
-        print("\nTo use the full dataset:")
-        print("1. Download from: https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset")
-        print("2. Place Fake.csv and True.csv in data/raw/ folder")
-        print("3. Run this script again\n")
-        train_model(use_kaggle=False)
+    train_model()

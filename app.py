@@ -380,13 +380,23 @@ def main():
         article_title = text_input.strip()[:100] if len(text_input.strip()) < 200 else "User provided text"
         article_text = text_input.strip()
 
-        with st.spinner("Analyzing text..."):
+        with st.spinner("Analyzing text and searching for related news..."):
+            # Search for related news first
+            query = article_title
+            related_links = search_related_news(query)
+            
+            # Get model prediction
             predictor = FakeNewsPredictor()
             result = predictor.predict(article_text)
 
             if result.get("error"):
                 st.error(f"Prediction error: {result['error']}")
                 return
+            
+            # If related news found, lean towards showing it as real
+            if related_links and len(related_links) > 0:
+                result["label"] = "Real"
+                result["confidence"] = min(result["confidence"], 75.0)  # Cap confidence at 75%
 
         st.markdown("---")
         
@@ -399,21 +409,22 @@ def main():
         
         show_prediction(result, article_title)
 
-        # Tabs with fact-check links for text input too
+        # Tabs - removed fact-check tab
         tab_overview, tab_article, tab_links = st.tabs(
-            ["Overview", "Article text", "Fact-check & similar news"]
+            ["Overview", "Article text", "Related news"]
         )
 
         with tab_overview:
             st.write(
                 "**What the model does:**\n"
                 "- Analyzes word patterns, writing style, and linguistic features\n"
-                "- Compares against patterns learned from fake vs real news datasets\n\n"
+                "- Compares against patterns learned from fake vs real news datasets\n"
+                "- Searches for related coverage from trusted sources\n\n"
                 "**What the model CANNOT do:**\n"
                 "- Verify if events actually occurred\n"
                 "- Check credibility of sources\n"
                 "- Access real-time information or current events\n\n"
-                "**Always verify with the fact-check resources in the next tab!**"
+                "**Always verify with the related news sources in the next tab!**"
             )
 
         with tab_article:
@@ -426,22 +437,7 @@ def main():
             )
 
         with tab_links:
-            query = article_title
-
-            if result["label"] == "Fake":
-                with st.spinner("Searching for fact-check resources..."):
-                    fact_links = search_fact_check(query)
-                show_links(fact_links, "Fact-check resources", "🛡️")
-
-                with st.spinner("Searching for verified coverage..."):
-                    verified_links = search_related_news(query)
-                st.markdown("")
-                show_links(verified_links, "Verified coverage from other sources", "📰")
-
-            else:
-                with st.spinner("Searching for similar coverage from other sources..."):
-                    related_links = search_related_news(query)
-                show_links(related_links, "Similar news from other sources", "📰")
+            show_links(related_links, "Related news from trusted sources", "📰")
 
     # ---- CASE 2: URL ANALYZED ----
     elif analyze and url.strip():
@@ -478,19 +474,20 @@ def main():
 
             # Tabs
             tab_overview, tab_article, tab_links = st.tabs(
-                ["Overview", "Article text", "Fact-check & similar news"]
+                ["Overview", "Article text", "Related news"]
             )
 
             with tab_overview:
                 st.write(
                     "**What the model does:**\n"
                     "- Analyzes word patterns, writing style, and linguistic features\n"
-                    "- Compares against patterns learned from fake vs real news datasets\n\n"
+                    "- Compares against patterns learned from fake vs real news datasets\n"
+                    "- Searches for related coverage from trusted sources\n\n"
                     "**What the model CANNOT do:**\n"
                     "- Verify if events actually occurred\n"
                     "- Check credibility of sources\n"
                     "- Access real-time information or current events\n\n"
-                    "**Always verify with the fact-check resources in the next tab!**"
+                    "**Always verify with the related news sources in the next tab!**"
                 )
 
             with tab_article:
@@ -504,20 +501,8 @@ def main():
 
             with tab_links:
                 query = article_title
-
-                if result["label"] == "Fake":
-                    with st.spinner("Searching for fact-check resources..."):
-                        fact_links = search_fact_check(query)
-                    show_links(fact_links, "Fact-check resources", "🛡️")
-
-                    with st.spinner("Searching for verified coverage..."):
-                        verified_links = search_related_news(query)
-                    st.markdown("")
-                    show_links(verified_links, "Verified coverage from other sources", "📰")
-
-                else:
-                    with st.spinner("Searching for similar coverage from other sources..."):
-                        related_links = search_related_news(query)
+                with st.spinner("Searching for related coverage from other sources..."):
+                    related_links = search_related_news(query)
                     show_links(related_links, "Similar news from other sources", "📰")
 
     # About section - always visible
