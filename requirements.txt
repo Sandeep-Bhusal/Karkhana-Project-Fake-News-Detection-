@@ -1,6 +1,6 @@
 # Fake News Detection System Requirements
 
-# Core dependencies
+# Core dependencies for Streamlit app
 streamlit==1.28.1
 pandas==2.0.3
 numpy==1.24.3
@@ -18,9 +18,10 @@ requests==2.31.0
 # NLP and preprocessing
 nltk==3.8.1
 
-# Pickle (included in Python standard library, but listing for clarity)
-# pickle - standard library
-
-# Optional: For Jupyter notebooks (if needed for development)
+# Optional: For model training with Jupyter notebook
+# Uncomment these lines if you need to retrain the model
+# matplotlib==3.7.2
+# seaborn==0.12.2
 # jupyter==1.0.0
 # notebook==7.0.6
+# ipykernel==6.25.0

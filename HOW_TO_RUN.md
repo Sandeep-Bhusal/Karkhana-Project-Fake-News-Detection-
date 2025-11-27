@@ -31,37 +31,47 @@ This will install:
 - requests (HTTP requests)
 - nltk (text processing)
 
-## Step 2: Train the Model
+## Step 2: Train the Model (Using Jupyter Notebook)
 
-Train the fake news detection model:
+The models are trained using the Jupyter notebook. Open and run the notebook:
 
+**Option 1: Using VS Code**
+1. Open `model/fake-news-detection.ipynb` in VS Code
+2. Select Python kernel (the .venv environment)
+3. Click "Run All" or run cells sequentially
+4. Wait for all cells to complete (takes 5-10 minutes)
+
+**Option 2: Using Jupyter Notebook**
 ```bash
-python model/train_model.py
+jupyter notebook
 ```
-**Expected Output:**
+Then navigate to `model/fake-news-detection.ipynb` and run all cells.
+
+**What the notebook does:**
+- Loads and processes the dataset (Fake.csv and True.csv)
+- Trains 4 different ML models:
+  - Logistic Regression
+  - Decision Tree
+  - Gradient Boosting Classifier
+  - Random Forest Classifier
+- Evaluates each model with classification reports
+- Saves the trained models:
+  - `model.pkl` - Logistic Regression (used by Streamlit app)
+  - `tfidf_vectorizer.pkl` - TF-IDF vectorizer
+  - `all_models.pkl` - All 4 models for comparison
+
+**Expected output at the end:**
 ```
+✓ Logistic Regression model saved
+✓ TF-IDF vectorizer saved
+✓ All models saved
+
 ============================================================
-FAKE NEWS DETECTION MODEL TRAINING
-============================================================
-
-[1/6] Loading dataset...
-Total samples: 20
-Fake news: 10
-Real news: 10
-
-[2/6] Cleaning text data...
-[3/6] Splitting data into train and test sets...
-[4/6] Creating TF-IDF features...
-[5/6] Training Logistic Regression model...
-✓ Model training completed
-
-[6/6] Evaluating model performance...
-Accuracy: XX.XX%
-
-✓ Model saved to model/model.pkl
-✓ Vectorizer saved to model/tfidf.pkl
+MODEL TRAINING COMPLETED!
 ============================================================
 ```
+
+**Note:** Pre-trained models are already included. You only need to retrain if you want to update the models with new data.
 
 ---
 

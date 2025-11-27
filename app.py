@@ -17,6 +17,17 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+@st.cache_resource
+def load_predictor():
+    """Load predictor with caching"""
+    try:
+        detector = FakeNewsPredictor()
+        st.success("✓ Model and vectorizer loaded successfully")
+        return detector
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
+        return None
+
 # -------------------- CSS STYLING --------------------
 st.markdown(
     """
@@ -277,10 +288,6 @@ def show_prediction(result: dict, title: str):
         f'<p class="result-title">{title or "Untitled article"}</p>',
         unsafe_allow_html=True,
     )
-    st.markdown(
-        f'<p class="result-conf">Model confidence: {conf:.1f}%</p>',
-        unsafe_allow_html=True,
-    )
 
 
 def show_links(links, heading: str, icon: str):
@@ -326,6 +333,13 @@ def main():
 
     # Main white card
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
+
+    # Load predictor
+    predictor = load_predictor()
+    
+    if predictor is None:
+        st.error("Unable to load the model. Please check if the model files exist.")
+        return
 
     # Input options
     input_mode = st.radio(
@@ -382,7 +396,6 @@ def main():
 
         with st.spinner("Analyzing text..."):
             # Get model prediction based on text content
-            predictor = FakeNewsPredictor()
             result = predictor.predict(article_text)
 
             if result.get("error"):
@@ -458,7 +471,6 @@ def main():
                 article_text = article_data["full_text"]
 
                 # 2. Predict
-                predictor = FakeNewsPredictor()
                 result = predictor.predict(article_text)
 
                 if result.get("error"):

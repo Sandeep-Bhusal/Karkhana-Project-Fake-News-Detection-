@@ -48,6 +48,13 @@ Thumbs.db
 
 # Data files (keep structure but ignore large datasets)
 data/raw/*.csv
+
+# Large model files (keep only essential models)
+model/all_models.pkl
+
+# Dataset files
+Fake.csv
+True.csv
 data/processed/*.csv
 data/raw/*.txt
 data/processed/*.txt

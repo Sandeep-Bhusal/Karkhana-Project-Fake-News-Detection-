@@ -10,7 +10,7 @@ class FakeNewsPredictor:
     Predictor class for fake news detection
     """
     
-    def __init__(self, model_path='model/model.pkl', tfidf_path='model/tfidf.pkl'):
+    def __init__(self, model_path='model/model.pkl', tfidf_path='model/tfidf_vectorizer.pkl'):
         """
         Initialize the predictor with saved model and vectorizer
         
@@ -77,20 +77,46 @@ class FakeNewsPredictor:
             # Transform text using TF-IDF
             text_vector = self.tfidf.transform([cleaned_text])
             
-            # Make prediction
-            prediction = self.model.predict(text_vector)[0]
-            
             # Get probability scores
             proba = self.model.predict_proba(text_vector)[0]
-            confidence = max(proba) * 100
+            fake_prob = proba[0]  # Probability of being fake (class 0)
+            real_prob = proba[1]  # Probability of being real (class 1)
             
-            # Map prediction to label (0 = Fake, 1 = Real)
-            label = 'Real' if prediction == 1 else 'Fake'
+            # Adjust threshold based on text length - be very conservative
+            text_length = len(cleaned_text.split())
+            
+            if text_length < 30:
+                # For short text, require very high confidence for "Fake"
+                threshold = 0.85
+            elif text_length < 150:
+                # For medium text, still very conservative
+                threshold = 0.75
+            else:
+                # For longer articles, still conservative
+                threshold = 0.65
+            
+            if real_prob > threshold:
+                prediction = 1
+                label = 'Real'
+                confidence = real_prob * 100
+            elif fake_prob > threshold:
+                prediction = 0
+                label = 'Fake'
+                confidence = fake_prob * 100
+            else:
+                # Uncertain case - default to Real to avoid false alarms
+                prediction = 1
+                label = 'Real'
+                confidence = max(real_prob, 51.0) * 100
             
             return {
                 'prediction': prediction,
                 'label': label,
                 'confidence': round(confidence, 2),
+                'probabilities': {
+                    'fake': round(fake_prob * 100, 2),
+                    'real': round(real_prob * 100, 2)
+                },
                 'error': None
             }
             
